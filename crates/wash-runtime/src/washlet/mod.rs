@@ -396,6 +396,11 @@ pub struct ClusterHostBuilder {
 }
 
 impl ClusterHostBuilder {
+    /// The host ID used in control subjects and connection names.
+    pub fn host_id(&self) -> &str {
+        self.host_builder.id()
+    }
+
     /// The interval this host will actually heartbeat on, resolved.
     ///
     /// Public so a caller sizing a liveness bound reads the number the host was
@@ -2087,6 +2092,14 @@ mod tests {
     use super::*;
     use crate::host::allowed_hosts::AllowedHost;
     use crate::host::allowed_ip_name::AllowedIpName;
+
+    #[test]
+    fn cluster_host_id_matches_the_inner_builder() -> anyhow::Result<()> {
+        let host = crate::host::HostBuilder::default().with_id("host-test_1")?;
+        let cluster = ClusterHostBuilder::default().with_host_builder(host);
+        assert_eq!(cluster.host_id(), "host-test_1");
+        Ok(())
+    }
 
     #[tokio::test]
     async fn cancelled_and_concurrent_shutdowns_wait_for_the_same_task() -> anyhow::Result<()> {
